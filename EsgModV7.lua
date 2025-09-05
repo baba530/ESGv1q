@@ -1,5 +1,5 @@
 local gui = Instance.new("ScreenGui")
-gui.Name = "EsgModV6"
+gui.Name = "EsgModV7"
 gui.ResetOnSpawn = false
 gui.Parent = game.CoreGui
 
@@ -9,7 +9,7 @@ local cam = workspace.CurrentCamera
 -- Açma Tuşu (küçük)
 local openBtn = Instance.new("TextButton")
 openBtn.Parent = gui
-openBtn.Text = "V1"
+openBtn.Text = "V7"
 openBtn.Size = UDim2.new(0, 50, 0, 50)
 openBtn.Position = UDim2.new(0.02, 0, 0.85, 0)
 openBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -73,9 +73,29 @@ end)local function createButton(text, yPos, callback)
     return btn
 end
 
+-- TP Walk
+local tpWalkOn = false
+createButton("🌀 TP Walk [Kapalı]", 0.05, function(btn)
+    tpWalkOn = not tpWalkOn
+    btn.Text = tpWalkOn and "🌀 TP Walk [Açık]" or "🌀 TP Walk [Kapalı]"
+    spawn(function()
+        while tpWalkOn do
+            wait(0.1)
+            local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+            if hum then
+                hum.WalkSpeed = 200
+                local root = player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    root.CFrame = root.CFrame + root.CFrame.LookVector * 2
+                end
+            end
+        end
+    end)
+end)
+
 -- Camlock
 local camlockOn = false
-createButton("🎯 Camlock [Kapalı]", 0.05, function(btn)
+createButton("🎯 Camlock [Kapalı]", 0.12, function(btn)
     camlockOn = not camlockOn
     btn.Text = camlockOn and "🎯 Camlock [Açık]" or "🎯 Camlock [Kapalı]"
     spawn(function()
@@ -100,17 +120,17 @@ end)
 
 -- Auto Hit
 local autoHitOn = false
-createButton("🗡️ Auto Hit [Kapalı]", 0.12, function(btn)
+createButton("🗡️ Auto Hit [Kapalı]", 0.19, function(btn)
     autoHitOn = not autoHitOn
     btn.Text = autoHitOn and "🗡️ Auto Hit [Açık]" or "🗡️ Auto Hit [Kapalı]"
     spawn(function()
         while autoHitOn do
             wait(0.5)
-            for _, enemy in pairs(workspace:FindFirstChild("Enemies"):GetChildren()) do
-                if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
+            for _, enemy in pairs(workspace:GetDescendants()) do
+                if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
                     local dist = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                    if dist < 15 then
-                        enemy.Humanoid:TakeDamage(50)
+                    if dist < 20 then
+                        enemy.Humanoid:TakeDamage(25)
                     end
                 end
             end
@@ -118,39 +138,25 @@ createButton("🗡️ Auto Hit [Kapalı]", 0.12, function(btn)
     end)
 end)-- Oyuncu ESP
 local espOn = false
-createButton("👁️ Oyuncu ESP [Kapalı]", 0.19, function(btn)
+createButton("👁️ Oyuncu ESP [Kapalı]", 0.26, function(btn)
     espOn = not espOn
     btn.Text = espOn and "👁️ Oyuncu ESP [Açık]" or "👁️ Oyuncu ESP [Kapalı]"
     for _, plr in pairs(game.Players:GetPlayers()) do
         if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
             if espOn then
-                local billboard = Instance.new("BillboardGui", plr.Character)
-                billboard.Name = "EsgESP"
-                billboard.Size = UDim2.new(0, 200, 0, 50)
-                billboard.Adornee = plr.Character.Head
-                billboard.AlwaysOnTop = true
+                local tag = Instance.new("BillboardGui", plr.Character)
+                tag.Name = "EsgESP"
+                tag.Size = UDim2.new(0, 200, 0, 50)
+                tag.Adornee = plr.Character.Head
+                tag.AlwaysOnTop = true
 
-                local nameLabel = Instance.new("TextLabel", billboard)
-                nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                nameLabel.Text = plr.Name
-                nameLabel.TextColor3 = Color3.new(1, 1, 1)
-                nameLabel.BackgroundTransparency = 1
-                nameLabel.Font = Enum.Font.SourceSansBold
-                nameLabel.TextScaled = true
-
-                local healthBar = Instance.new("Frame", billboard)
-                healthBar.Size = UDim2.new(1, 0, 0.5, 0)
-                healthBar.Position = UDim2.new(0, 0, 0.5, 0)
-                healthBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-                healthBar.BorderSizePixel = 0
-
-                spawn(function()
-                    while espOn and plr.Character and plr.Character:FindFirstChild("Humanoid") do
-                        local hp = plr.Character.Humanoid.Health / plr.Character.Humanoid.MaxHealth
-                        healthBar.Size = UDim2.new(hp, 0, 0.5, 0)
-                        wait(0.2)
-                    end
-                end)
+                local label = Instance.new("TextLabel", tag)
+                label.Size = UDim2.new(1, 0, 1, 0)
+                label.Text = plr.Name
+                label.TextColor3 = Color3.new(1, 1, 1)
+                label.BackgroundTransparency = 1
+                label.Font = Enum.Font.SourceSansBold
+                label.TextScaled = true
             else
                 if plr.Character:FindFirstChild("EsgESP") then
                     plr.Character.EsgESP:Destroy()
@@ -162,7 +168,7 @@ end)
 
 -- Fruit ESP
 local fruitESPOn = false
-createButton("🍍 Fruit ESP [Kapalı]", 0.26, function(btn)
+createButton("🍍 Fruit ESP [Kapalı]", 0.33, function(btn)
     fruitESPOn = not fruitESPOn
     btn.Text = fruitESPOn and "🍍 Fruit ESP [Açık]" or "🍍 Fruit ESP [Kapalı]"
     for _, fruit in pairs(workspace:GetDescendants()) do
@@ -190,14 +196,14 @@ createButton("🍍 Fruit ESP [Kapalı]", 0.26, function(btn)
     end
 end)
 
--- Anti Stun
+-- Anti Stun (optimize)
 local antiStunOn = false
-createButton("🛡️ Anti Stun [Kapalı]", 0.33, function(btn)
+createButton("🛡️ Anti Stun [Kapalı]", 0.40, function(btn)
     antiStunOn = not antiStunOn
     btn.Text = antiStunOn and "🛡️ Anti Stun [Açık]" or "🛡️ Anti Stun [Kapalı]"
     spawn(function()
         while antiStunOn do
-            wait(0.5)
+            wait(0.3)
             local hum = player.Character and player.Character:FindFirstChild("Humanoid")
             if hum then
                 hum.PlatformStand = false
@@ -207,34 +213,20 @@ createButton("🛡️ Anti Stun [Kapalı]", 0.33, function(btn)
     end)
 end)
 
--- Skill Spam
+-- Skill Spam (güvenli)
 local spamOn = false
-createButton("🔁 Skill Spam [Kapalı]", 0.40, function(btn)
+createButton("🔁 Skill Spam [Kapalı]", 0.47, function(btn)
     spamOn = not spamOn
     btn.Text = spamOn and "🔁 Skill Spam [Açık]" or "🔁 Skill Spam [Kapalı]"
     spawn(function()
         while spamOn do
-            wait(0.3)
+            wait(0.5)
             for _, key in pairs({"Z", "X", "C"}) do
-                game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
-                wait(0.1)
+                pcall(function()
+                    game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                end)
+                wait(0.2)
             end
         end
     end)
-end)
-
--- Speed Sistemi
-local speed = 16
-createButton("🏃 Hız Artır [16]", 0.47, function(btn)
-    speed = speed + 20
-    if speed > 300 then speed = 16 end
-    btn.Text = "🏃 Hız Artır [" .. speed .. "]"
-    player.Character.Humanoid.WalkSpeed = speed
-end)
-
--- Speed Reset
-createButton("🔄 Hız Sıfırla", 0.54, function(btn)
-    speed = 16
-    player.Character.Humanoid.WalkSpeed = speed
-    btn.Text = "🔄 Hız Sıfırla [16]"
 end)
